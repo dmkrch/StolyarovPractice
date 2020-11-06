@@ -1,0 +1,5 @@
+rows: 3
+columns: 4
+name: Dzmitry
+surname: Karpovich
+mark: 10
