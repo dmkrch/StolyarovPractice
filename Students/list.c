@@ -1,12 +1,6 @@
 #include <stdio.h>
-#include "student.c"
-
-struct Node
-{
-    struct Node* nextPointer;
-    struct Student* student;
-};
-
+#include "list.h"
+#include "student.h"
 
 struct Node* CreateList()
 {

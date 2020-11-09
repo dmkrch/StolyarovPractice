@@ -1,14 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "student.h"
 
-
-struct Student
-{
-    char* name;
-    int group;
-    int mark;
-};
 
 struct Student* CreateStudent(char* name, int group, int mark)
 {
