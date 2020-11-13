@@ -8,20 +8,21 @@ int main()
 {
     int pid;
     pid = fork();
-    if (pid == -1)
+    if (pid == -1)  // ошибка порождения процесса
     {
         perror("fork");
         exit(1);
     }
 
-    if (pid == 0)
+    if (pid == 0) // порожденный процесс
     {
         execlp("ls", "ls", "-l", "-a", "/var", NULL);
-        perror("ls");
-        exit(1);
+        perror("ls"); // exec вернул управление - ошибка
+        exit(1); // завершаем процесс с кодом неуспеха
     }
 
-    wait(NULL);
+    // родительский процесс
+    wait(NULL); // дожидаемся завершения
 
     printf("Ok\n");
     return 0;
