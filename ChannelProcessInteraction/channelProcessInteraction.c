@@ -36,7 +36,7 @@ int main()
     /* parent */
     close(fd[0]);
     close(fd[1]);
-    
+
     printf("%s",data);
 
 }
