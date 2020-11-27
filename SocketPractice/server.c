@@ -19,9 +19,7 @@ int main(int argc, char** argv)
 
     /* buffer for data */
     char sendBuff[BUFFSIZE];
-
-    /* ticks of time */
-    time_t ticks;
+    const char* helloMessage = "Hello from server!\n";
 
     /* creating a new socket for listening in server */
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -50,10 +48,9 @@ int main(int argc, char** argv)
         /* connfd is file descriptor of interraction-socket(connection socket)
            of server and client */
         connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
-        ticks = time(NULL);
 
         /* write formatted string to buffer */
-        snprintf(sendBuff, sizeof(sendBuff), "%.24s\r\n", ctime(&ticks));
+        snprintf(sendBuff, sizeof(sendBuff), "%s\r\n", helloMessage);
 
         /* writing buffer data to connection-socket */
         write(connfd, sendBuff, strlen(sendBuff));
