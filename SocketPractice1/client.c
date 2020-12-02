@@ -16,6 +16,7 @@ int main(int argc, char **argv)
 {
     int sockfd = 0;      // file descriptor of socket in client
     struct sockaddr_in serv_addr;
+    char recvBuffer[1024];
 
     if(argc != 2)
     {
@@ -51,9 +52,10 @@ int main(int argc, char **argv)
        return 1;
     }
 
-
     while(1)
     {
+        memset(recvBuffer, '\0', sizeof(recvBuffer));
+
         fprintf(stdout, "Enter your name: ");
         char name[MAX_STRING_SIZE];
         fgets(name, sizeof(name), stdin);
@@ -61,6 +63,8 @@ int main(int argc, char **argv)
         /* now we need to move this string to buffer, so that server get it */
         send(sockfd, name, sizeof(name), 0);
     }
+
+    close(sockfd);
 
     return 0;
 }

@@ -50,9 +50,15 @@ int main(int argc, char** argv)
 
     while(1)
     {
+        memset(sendBuff, '\0', sizeof(sendBuff));
+
         char name[MAX_STRING_SIZE];
         recv(connfd, name, sizeof(name), 0);
 
-        PrintUserInfoByName(name);
+        CreateUserInfoByNameString(name, sendBuff);
+
+        printf(sendBuff);
     }
+
+    close(connfd);
 }

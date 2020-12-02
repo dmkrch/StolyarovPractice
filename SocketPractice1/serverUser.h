@@ -18,6 +18,6 @@ struct ServerUser
 
 
 /* prints user information by name */
-void PrintUserInfoByName(char* name);
+int CreateUserInfoByNameString(char* userName, char* bufferString);
 
 #endif
