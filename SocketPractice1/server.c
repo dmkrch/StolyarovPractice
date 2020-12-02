@@ -53,9 +53,16 @@ int main(int argc, char** argv)
         char name[MAX_STRING_SIZE];
         recv(connfd, name, sizeof(name), 0);
 
-        CreateUserInfoByNameString(name, sendBuff);
+        int status = CreateUserInfoByNameString(name, sendBuff);
 
-        printf("%s", sendBuff);
+        if(status == 0)
+        {
+            printf("user is founded";
+        }
+        else
+        {
+            printf("no such users\n");
+        }
 
         /* sending needed data(sendBuff) to socket */
         send(connfd, sendBuff, BUFFSIZE, 0);
