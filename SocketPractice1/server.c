@@ -50,14 +50,18 @@ int main(int argc, char** argv)
 
     while(1)
     {
-        memset(sendBuff, '\0', sizeof(sendBuff));
-
         char name[MAX_STRING_SIZE];
         recv(connfd, name, sizeof(name), 0);
 
         CreateUserInfoByNameString(name, sendBuff);
 
-        printf(sendBuff);
+        printf("%s", sendBuff);
+
+        /* sending needed data(sendBuff) to socket */
+        send(connfd, sendBuff, BUFFSIZE, 0);
+
+        /* clearing buffer */
+        memset(sendBuff, '0', sizeof(sendBuff));
     }
 
     close(connfd);

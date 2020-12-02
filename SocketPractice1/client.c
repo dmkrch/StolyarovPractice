@@ -10,13 +10,13 @@
 #include <arpa/inet.h>
 
 #define MAX_STRING_SIZE 25
-
+#define BUFFSIZE 1025
 
 int main(int argc, char **argv)
 {
     int sockfd = 0;      // file descriptor of socket in client
     struct sockaddr_in serv_addr;
-    char recvBuffer[1024];
+    char recvBuffer[BUFFSIZE];
 
     if(argc != 2)
     {
@@ -54,14 +54,21 @@ int main(int argc, char **argv)
 
     while(1)
     {
-        memset(recvBuffer, '\0', sizeof(recvBuffer));
-
         fprintf(stdout, "Enter your name: ");
         char name[MAX_STRING_SIZE];
         fgets(name, sizeof(name), stdin);
 
         /* now we need to move this string to buffer, so that server get it */
         send(sockfd, name, sizeof(name), 0);
+
+        /* getting data from server */
+        int bytes_read = recv(sockfd, recvBuffer, BUFFSIZE, 0);
+        recvBuffer[bytes_read] = '\0';
+        printf("%s", recvBuffer);
+
+
+        /* clearing buffer */
+        memset(recvBuffer, '0', BUFFSIZE);
     }
 
     close(sockfd);
