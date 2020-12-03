@@ -44,32 +44,51 @@ int main(int argc, char** argv)
 
     listen(listenfd, 10);  // we transform socket into listening mode
 
-    /* connfd is file descriptor of interraction-socket(connection socket)
-       of server and client */
-    connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
-
     while(1)
     {
-        char name[MAX_STRING_SIZE];
-        recv(connfd, name, sizeof(name), 0);
+        /* connfd is file descriptor of interraction-socket(connection socket)
+            of server and client */
+        connfd = accept(listenfd, (struct sockaddr*)NULL, NULL);
 
-        int status = CreateUserInfoByNameString(name, sendBuff);
-
-        if(status == 0)
+        switch(fork())
         {
-            printf("user is founded";
-        }
-        else
-        {
-            printf("no such users\n");
-        }
+            case -1:
+                perror("fork");
+                break;
 
-        /* sending needed data(sendBuff) to socket */
-        send(connfd, sendBuff, BUFFSIZE, 0);
+            case 0:  // child process
+                while(1)
+                {
+                    close(listenfd);
 
-        /* clearing buffer */
-        memset(sendBuff, '0', sizeof(sendBuff));
+                    char name[MAX_STRING_SIZE];
+                    recv(connfd, name, sizeof(name), 0);
+
+                    int status = CreateUserInfoByNameString(name, sendBuff);
+
+                    if(status == 0)
+                    {
+                        fprintf(stdout, "<#%d client>: user is founded\n", connfd);
+                    }
+                    else
+                    {
+                        fprintf(stdout,"<#%d client>: no such users\n", connfd);
+                    }
+
+                    /* sending needed data(sendBuff) to socket */
+                    send(connfd, sendBuff, BUFFSIZE, 0);
+
+                    /* clearing buffer */
+                    memset(sendBuff, '0', sizeof(sendBuff));
+                }
+
+                close(connfd);
+                _exit(0);
+
+            default:
+                close(connfd);
+        }
     }
-
+    close(listenfd);
     close(connfd);
 }
