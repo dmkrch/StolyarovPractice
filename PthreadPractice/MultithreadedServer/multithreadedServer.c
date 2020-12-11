@@ -42,23 +42,23 @@ int main(int argc, char** argv)
     check(listen(server_socket, SERVER_BACKLOG),
         "Listen failded!");
 
-    while(true)
-    {
-        printf("Waiting for connections...\n");
-        //wait for, and eventually accept an incoming connection
-        addr_size = sizeof(SA_IN);
+        while(true)
+        {
+            printf("Waiting for connections...\n");
+            //wait for, and eventually accept an incoming connection
+            addr_size = sizeof(SA_IN);
 
-        check(client_socket = 
-            accept(server_socket, (SA*)&client_addr, (socklen_t*)&addr_size),
-            "Accept failed");
-        
-        printf("Connected!\n");
+            check(client_socket = 
+                accept(server_socket, (SA*)&client_addr, (socklen_t*)&addr_size),
+                "Accept failed");
+            
+            printf("Connected!\n");
 
-        //do whatever we do with connections
-        handle_connection(client_socket);
-    }
+            //do whatever we do with connections
+            handle_connection(client_socket);
+        }
 
-    return 0;
+        return 0;
 }
 
 int check(int exp, const char* msg)
@@ -76,29 +76,44 @@ void handle_connection(int client_socket)
 {
     char buffer[BUFSIZE];
     size_t bytes_read;
-    int msgsize = 0;
     char actualpath[PATH_MAX+1];
 
     //read the clients's message -- the name of the file to read 
-    while((bytes_read = read(client_socket, buffer+msgsize, sizeof(buffer)-msgsize-1))> 0)
-    {
-        msgsize += bytes_read;
-
-        if (msgsize > BUFSIZE - 1 || buffer[msgsize-1]== '\n')
-            break;
-    }
+    bytes_read = recv(client_socket, buffer, BUFSIZE, 0);
 
     check(bytes_read, "recv error");
-    buffer[msgsize-1] = 0; // null terminate the message and remove \n
+    //buffer[msgsize-1] = 0; // null terminate the message and remove \n
         
     printf("REQUEST: %s\n", buffer);
     fflush(stdout);
         
-    // validity check
+        
+    // validity of file path
     if (realpath(buffer, actualpath) == NULL)
     {
         printf("ERROR(bad path): %s\n", buffer);
         close(client_socket);
         return;
     }
+
+    // open file
+    FILE* fp = fopen(actualpath, "r");
+    if (fp == NULL)
+    {
+        printf("ERROR(open): %s\n", buffer);
+        close(client_socket);
+        return;
+    }
+
+    // read file contents and send them to client
+    // note this is an example program and it is insecure
+    // a real program would probably limit the client to certain files
+    while((bytes_read = fread(buffer, 1, BUFSIZE, fp)) > 0)
+    {
+        printf("sending %zu bytes\n", bytes_read);
+        write(client_socket, buffer, bytes_read);
+    }
+    close(client_socket);
+    fclose(fp);
+    printf("closing connection\n");
 }
