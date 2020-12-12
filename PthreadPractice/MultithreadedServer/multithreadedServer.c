@@ -85,17 +85,23 @@ int main(int argc, char** argv)
         return 0;
 }
 
-
 void* thread_function(void* arg)
 {
     while(true)
     {
         int* pclient;
 
-        pthread_mutex_lock(&dequeue_mutex);
+        pthread_mutex_lock(&dequeue_mutex);                         // locking section
+
         pthread_cond_wait(&condition_var, &dequeue_mutex);
-        pclient = dequeue();
-        pthread_mutex_unlock(&dequeue_mutex);
+        if((pclient = dequeue()) == NULL)
+        {
+            pthread_cond_wait(&condition_var, &dequeue_mutex);
+            //try again
+            pclient = dequeue();
+        }
+
+        pthread_mutex_unlock(&dequeue_mutex);                       // unlocking section
 
         if (pclient != NULL)
         {
