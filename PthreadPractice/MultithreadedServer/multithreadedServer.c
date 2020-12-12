@@ -7,17 +7,29 @@
 #include <arpa/inet.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <pthread.h>
+#include "myqueue.h"
+
 
 #define SERVERPORT 8989
 #define BUFSIZE 4096
 #define SOCKETERROR (-1)
-#define SERVER_BACKLOG 1
+#define SERVER_BACKLOG 100
+#define THREAD_POOL_SIZE 20
+
+pthread_t thread_pool[THREAD_POOL_SIZE];
+pthread_mutex_t enqueue_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t dequeue_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 
 typedef struct sockaddr_in SA_IN;
 typedef struct sockaddr SA;
 
-void handle_connection(int client_socket);
+void* thread_function(void* arg);
+void* handle_connection(void* p_client_socket);
 int check(int exp, const char* msg);
+
+
 
 int main(int argc, char** argv)
 {
@@ -27,6 +39,12 @@ int main(int argc, char** argv)
  
     SA_IN server_addr;
     SA_IN client_addr;
+
+    // first we create a bunch of threads to handle future connections
+    for(int i = 0; i < THREAD_POOL_SIZE; ++i)
+    {
+        pthread_create(&thread_pool[i], NULL, thread_function, NULL);
+    }
 
     check((server_socket = socket(AF_INET, SOCK_STREAM, 0)),
              "Failed to create socket");
@@ -54,11 +72,33 @@ int main(int argc, char** argv)
             
             printf("Connected!\n");
 
-            //do whatever we do with connections
-            handle_connection(client_socket);
+            
+            int* pclient = (int*)malloc(sizeof(int));
+            *pclient = client_socket;
+             
+            pthread_mutex_lock(&enqueue_mutex);
+            enqueue(pclient);
+            pthread_mutex_unlock(&enqueue_mutex);
         }
 
         return 0;
+}
+
+
+void* thread_function(void* arg)
+{
+    while(true)
+    {
+        pthread_mutex_lock(&dequeue_mutex);
+        int* pclient = dequeue();
+        pthread_mutex_unlock(&dequeue_mutex);
+
+        if (pclient != NULL)
+        {
+            // we have a connection
+            handle_connection(pclient);
+        }
+    }
 }
 
 int check(int exp, const char* msg)
@@ -72,8 +112,10 @@ int check(int exp, const char* msg)
     return exp; 
 }
 
-void handle_connection(int client_socket)
+void* handle_connection(void* p_client_socket)
 {
+    int client_socket = *((int*)p_client_socket);
+    free(p_client_socket);      // we really dont need this anymore
     char buffer[BUFSIZE];
     size_t bytes_read;
     char actualpath[PATH_MAX+1];
@@ -93,7 +135,7 @@ void handle_connection(int client_socket)
     {
         printf("ERROR(bad path): %s\n", buffer);
         close(client_socket);
-        return;
+        return NULL;
     }
 
     // open file
@@ -102,7 +144,7 @@ void handle_connection(int client_socket)
     {
         printf("ERROR(open): %s\n", buffer);
         close(client_socket);
-        return;
+        return NULL;
     }
 
     // read file contents and send them to client
@@ -116,4 +158,5 @@ void handle_connection(int client_socket)
     close(client_socket);
     fclose(fp);
     printf("closing connection\n");
+    return NULL;
 }
