@@ -26,7 +26,7 @@ void put_buffer_item(double v)
 
 double get_buffer_item()
 {
-    buffer.count --;
+    buffer.count--;
     return buffer.values[buffer.count];
 }
 
@@ -47,7 +47,7 @@ pthread_mutex_t grand_mutex = PTHREAD_MUTEX_INITIALIZER;
 sem_t producers_count;
 
 
-/* thread for reading data (consumer) */
+/* thread for reading data (producer) */
 void* producer_thread(void* v)
 {
     /* getting pointer to name of source in variable 'v' */
@@ -79,7 +79,9 @@ void* producer_thread(void* v)
 }
 
 
-/* thread-producer. Ignores input paramater value */
+/* thread-consumer. It takes values from buffer and makes calculations
+ Ignores input paramater value */
+ 
 void *consumer_thread(void* ignored)
 {
     double local_total = 0;     /* local addder */
@@ -87,13 +89,13 @@ void *consumer_thread(void* ignored)
     for(;;)
     {
         double val;
-        sem_wait(&buf_full);    /* consumer's algorithm */
+        sem_wait(&buf_full);          /* checking if there are any items in buffer */
         pthread_mutex_lock(&buf_mutex);
 
         val = get_buffer_item();
 
         pthread_mutex_unlock(&buf_mutex);
-        sem_post(&buf_empty);   /* --------- */
+        sem_post(&buf_empty);         /* raising empty slots of var 'buf_empty' */
 
         /* now we can get down to computing */
         local_total += log(val); local_count++;
