@@ -46,5 +46,10 @@ class Complex
 
 int main()
 {
+    Complex c1(2.7, 3.8);
+    Complex c2(1.15, -7.1);
+
+    Complex c3 = c1 + c2;
+    printf("%f", c3.GetIm());
     return 0;
 }
