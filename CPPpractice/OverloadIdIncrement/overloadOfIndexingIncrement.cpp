@@ -13,6 +13,7 @@ public:
     const IntVar& operator--() { --var; return *this; }
     const IntVar& operator--(int) { -- var; return *this; }
     void operator= (int value) { var = value; }
+    operator int() const {}
 };
 
 
@@ -72,7 +73,7 @@ int main()
     for (unsigned int i = 1; i <= 30; ++i)
     {
         arr[i]++;
-        printf("%d, ", arr[i].GetValue());
+        printf("%d, ", arr[i]);
         arr[i]--;
 
         if(i % 5 == 0)
