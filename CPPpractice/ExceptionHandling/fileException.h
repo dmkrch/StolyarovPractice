@@ -17,6 +17,7 @@ public:
     const char* GetComment() const { return comment; }
     int GetErrno() const { return errorCode; }
 private:   
+    /* this function returns new string according to str */
     static char* strdup1(const char* str);
 };
 

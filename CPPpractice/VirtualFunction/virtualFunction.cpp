@@ -40,7 +40,7 @@ public:
 
     void Show();
     void Hide();
-}
+};
 
 void Circle::Show() {/* another implementation */}
 void Circle::Hide() {/* another implementation */}
