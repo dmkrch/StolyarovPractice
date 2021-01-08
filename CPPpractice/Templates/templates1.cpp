@@ -1,5 +1,20 @@
 #include <stdio.h>
+#include <string.h>
 
+template <class T>
+bool sort_less(T a, T b)
+{
+    return a < b;
+}
+
+template <>
+bool sort_less<const char*>(const char* a, const char* b)
+{
+    return strcmp(a, b) < 0;
+}
+
+
+// for first example
 template <class T>
 void sort(T* array, int len)
 {
@@ -7,7 +22,7 @@ void sort(T* array, int len)
     {
         bool done = true;
         for (int i = len - 2; i >= start; i--)
-            if (array[i+1] < array[i])
+            if (sort_less<T>(array[i+1], array[i]))
             {
                 T tmp = array[i];
                 array[i] = array[i+1];
@@ -19,6 +34,9 @@ void sort(T* array, int len)
     }
 }
 
+
+
+// for second example
 class Point
 {
 public: 
@@ -61,6 +79,7 @@ private:
     T1 value;
     T2 value1;
 };
+
 
 
 int main()
