@@ -5,6 +5,8 @@
 #include "EventSelector.h"
 #include "ConstantsEnum.h"
 
+class ChatServer;
+
 /* single session of chat (user) */
 class ChatSession : private FdHandler
 {
@@ -16,7 +18,6 @@ private:
     char* name; 
     ChatServer* the_master;
     
-    ChatSession(ChatServer* a_master, int fd);
     ~ChatSession();
     void Send(const char* msg);
     virtual void Handle(bool r, bool w);
@@ -24,8 +25,8 @@ private:
     void ReadAndCheck();
     void CheckLines();
     void ProcessLine(const char* str);
+    ChatSession(ChatServer* a_master, int fd);
 };
-
 
 
 /* class for server of chat */

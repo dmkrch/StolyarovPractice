@@ -13,6 +13,8 @@
 
 
 /* REALISATIONS OF ChatServer */
+
+/* start of server */
 ChatServer* ChatServer::Start(EventSelector* sel, int port)
 {
     int ls, opt, res;
@@ -32,6 +34,7 @@ ChatServer* ChatServer::Start(EventSelector* sel, int port)
 
     if (res == -1)
         return 0;
+
     res = listen(ls, qlen_for_listen);
 
     if (res == -1)
@@ -62,7 +65,7 @@ ChatServer::~ChatServer()
 
 /* When listen socket is ready - we need to accept
 the connection via accept and create the instance 
-of chatSession */
+of chat session */
 void ChatServer::Handle(bool r, bool w)
 {
     if (!r)
@@ -114,13 +117,13 @@ void ChatServer::SendAll(const char* msg, ChatSession* except)
 
 /* REALISATIONS OF ChatSession */
 
-
 /* sends message to session */
 void ChatSession::Send(const char* msg)
 {
     write(GetFd(), msg, strlen(msg));
 }
 
+/* constructor */
 ChatSession::ChatSession(ChatServer* a_master, int fd)
     : FdHandler(fd, true), buf_used(0), ignoring(false),
     name(0), the_master(a_master)
@@ -128,8 +131,74 @@ ChatSession::ChatSession(ChatServer* a_master, int fd)
     Send("Your name please: ");
 }
 
+/* destructor */
 ChatSession::~ChatSession()
 {
     if (name)
         delete[] name;
 }
+
+/* handles descriptors */
+void ChatSession::Handle(bool r, bool w)
+{
+    if (!r) // should never happen
+        return;
+    
+    if (buf_used >= (int)sizeof(buffer))
+    {
+        buf_used = 0;
+        ignoring = true;
+    }
+    if (ignoring)
+        ReadAndIgnore();
+    else
+        ReadAndCheck();
+}
+
+
+void ChatSession::ReadAndIgnore()
+{
+    int rc = read(GetFd(), buffer, sizeof(buffer));
+    if (rc < 1)
+    {
+        the_master->RemoveSession(this);
+        return;
+    }
+    int i;
+    for (i = 0; i < rc; i++)
+    {
+        if (buffer[i] == '\n')
+        {
+            //stop ignoring !
+            int rest = rc - i - 1;
+            if (rest > 0)
+                memmove(buffer, buffer + i + 1, rest);
+            buf_used = rest;
+            ignoring = 0;
+            CheckLines();
+        }
+    }
+}
+
+void ChatSession::ReadAndCheck()
+{
+    int rc = 
+        read(GetFd(), buffer+buf_used, sizeof(buffer)-buf_used);
+    if (rc < 1)
+    {
+        if (name)
+        {
+            int len = strlen(name);
+            char* lmsg = new char[len + sizeof(left_msg) + 2];
+            sprintf(lmsg, "%s%s\n", name, left_msg);
+            the_master->SendAll(lmsg, this);
+            delete[] lmsg;   
+        }
+        the_master->RemoveSession(this);
+        return;
+    }
+    buf_used += rc;
+    CheckLines();
+}
+
+
