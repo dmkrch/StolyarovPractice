@@ -3,7 +3,6 @@
 
 #include "FdHandler.h"
 
-
 /* class that contains pointers to all objects of FdHandler */
 class EventSelector
 {

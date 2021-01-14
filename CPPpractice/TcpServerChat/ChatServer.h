@@ -1,16 +1,21 @@
 #ifndef CHATSERVER_SENTRY
 #define CHATSERVER_SENTRY
 
+#include "FdHandler.h"
+#include "EventSelector.h"
+#include "ConstantsEnum.h"
+
+/* single session of chat (user) */
 class ChatSession : private FdHandler
 {
 private:    
-    friend class ChatServer;
+    friend class ChatServer; /* functlty opened for ChatServer */
     char buffer[max_line_length + 1];
     int buf_used;
     bool ignoring;
-    char* name;
+    char* name; 
     ChatServer* the_master;
-
+    
     ChatSession(ChatServer* a_master, int fd);
     ~ChatSession();
     void Send(const char* msg);
@@ -21,19 +26,23 @@ private:
     void ProcessLine(const char* str);
 };
 
+
+
+/* class for server of chat */
 class ChatServer : public FdHandler
 {
 private:
     EventSelector* the_selector;
 
-    struct item 
+    struct item /* list of sessions */
     {
         ChatSession* s;
         item* next;
     };
     
-    item* first;
-    ChatServer(EventSelector* sel, int fd);
+    item* first;  /* head of list */
+    ChatServer(EventSelector* sel, int fd); /* constructor */
+    
 public:
     ~ChatServer();
     static ChatServer* Start(EventSelector* sel, int port);
