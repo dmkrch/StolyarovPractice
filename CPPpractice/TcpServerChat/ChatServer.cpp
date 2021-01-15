@@ -117,6 +117,13 @@ void ChatServer::SendAll(const char* msg, ChatSession* except)
 
 /* REALISATIONS OF ChatSession */
 
+/* welcome message to user of chat */
+static const char welcome_msg[] =
+    "Welcome to the chat, you are known as ";
+static const char entered_msg[] = " has entered the chat";
+static const char left_msg[] = " has left the chat";
+
+
 /* sends message to session */
 void ChatSession::Send(const char* msg)
 {
@@ -201,4 +208,49 @@ void ChatSession::ReadAndCheck()
     CheckLines();
 }
 
+void ChatSession::CheckLines()
+{
+    if (buf_used <= 0)
+        return;
+    
+    int i;
+    for (i = 0; i < buf_used; i++)
+    {
+        if (buffer[i] == '\n')
+        {
+            buffer[i] = 0;
+            if (i > 0 && buffer[i-1] == '\r')
+                buffer[i-1] = 0;
+            ProcessLine(buffer);
+            int rest = buf_used - i - 1;
+            memmove(buffer, buffer + i + 1, rest);
+            buf_used = rest;
+            CheckLines();
+            return;
+        }
+    }
+}
 
+void ChatSession::ProcessLine(const char* str)
+{
+    int len = strlen(str);
+    if (!name)
+    {
+        name = new char[len+1];
+        strcpy(name, str);
+        char* wmsg = new char[len + sizeof(welcome_msg) + 2];
+        sprintf(wmsg, "%s%s\n", welcome_msg, name);
+        Send(wmsg);
+        delete[] wmsg;
+        char* emsg = new char[len + sizeof(entered_msg) + 2];
+        sprintf(emsg, "%s%s\n", name, entered_msg);
+        the_master->SendAll(emsg, this);
+        delete[] emsg;
+        return;
+    }
+    int nl = strlen(name);
+    char* msg = new char[nl + len + 5];
+    sprintf(msg, "<%s> %s\n", name, str);
+    the_master->SendAll(msg);
+    delete[] msg;
+}
