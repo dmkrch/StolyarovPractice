@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <cerrno>
+#include <sys/time.h>
+#include <sys/select.h>
 
 
 /* destructor */

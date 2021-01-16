@@ -6,7 +6,7 @@
 #include "EventSelector.h"
 #include "ChatServer.h"
 
-static int port = 7777;
+static int port = 8989;
 
 int main()
 {
