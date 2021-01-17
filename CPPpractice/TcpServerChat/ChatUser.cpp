@@ -8,7 +8,6 @@
 #include <limits.h>
 #include <string.h>
 #include <netinet/in.h>
-#include <sys/socket.h>
 
 #define SERVERPORT 8989
 #define IP_ADDRESS "127.0.0.1"
