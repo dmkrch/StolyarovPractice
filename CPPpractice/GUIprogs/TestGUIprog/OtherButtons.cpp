@@ -50,6 +50,7 @@ static void set_callback(Fl_Widget* w, void* user)
         }
     }
     
+    /* whether checkbox is set - print A, else - print nothing */
     c->box->label(c->cb->value() ? "A" : "");
 }
 
