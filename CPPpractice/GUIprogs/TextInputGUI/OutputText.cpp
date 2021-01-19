@@ -49,8 +49,8 @@ int main()
     Fl_Input* inp = new Fl_Input(spacing + label_w, spacing, 
         inp_w, input_h, "Type:");
 
+
     inp->callback(say_callback, inp);
-    inp->when(FL_WHEN_ENTER_KEY|FL_WHEN_NOT_CHANGED);
 
     // creating buttons
     Fl_Button* sayButton = new Fl_Button(spacing, spacing*2 + input_h,
@@ -64,10 +64,15 @@ int main()
     clearButton->callback(clear_callback, inp);
 
 
-    Fl_Button* quitButton = new Fl_Button(3*spacing + button_w*2, 
+    Fl_Output* output = new Fl_Output(3*spacing + button_w*2, 
+        spacing*2 + input_h, button_w, input_h, "");
+    
+    output->box(FL_FLAT_BOX);
+    output->value("heasdfjlklljkjkla;laddaaa;sdfasd");
+   /* Fl_Button* quitButton = new Fl_Button(3*spacing + button_w*2, 
         spacing*2 + input_h, button_w, button_h, "Quit");
 
-    quitButton->callback(quit_callback, 0);
+    quitButton->callback(quit_callback, 0);*/
 
 
     win->end();
